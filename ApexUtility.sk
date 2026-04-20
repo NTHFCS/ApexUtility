@@ -1,0 +1,254 @@
+# ApexUtility v1.0
+# by NathanFCS
+#
+# Changelog:
+#   v1.0 - initial release
+#         - freeze system (duration, persist on logout)
+#         - invsee
+#         - vanish
+#         - chatclear (personal) + clearchat (global) + chatmute
+#
+# Todo:
+#   - freeze log to file
+#   - discord webhook on freeze
+#   - spy mode
+
+options:
+    prefix: &8[&cApex&8]&r
+    perm: apexutility.admin
+    freeze-color: &c
+    vanish-color: &b
+
+# ---------- freeze ----------
+
+command /freeze <player> [<text>]:
+    permission: {@perm}
+    permission message: {@prefix} &cNo permission.
+    trigger:
+        if arg-2 is not set:
+            send "{@prefix} &c/freeze <player> <duration> &8(e.g. 30s, 5m, 2h, 1d)"
+            stop
+
+        # parse duration
+        set {_raw} to arg-2 in lower case
+        set {_unit} to last character of {_raw}
+        set {_num} to {_raw} parsed as integer
+
+        # strip unit from number
+        set {_numstr} to {_raw}
+        replace all "s" in {_numstr} with ""
+        replace all "m" in {_numstr} with ""
+        replace all "h" in {_numstr} with ""
+        replace all "d" in {_numstr} with ""
+        set {_num} to {_numstr} parsed as integer
+
+        if {_num} is not set:
+            send "{@prefix} &cInvalid duration. Use: 30s / 5m / 2h / 1d"
+            stop
+        if {_num} <= 0:
+            send "{@prefix} &cDuration must be more than 0."
+            stop
+
+        # convert to seconds
+        if {_unit} is "s":
+            set {_secs} to {_num}
+        else if {_unit} is "m":
+            set {_secs} to {_num} * 60
+        else if {_unit} is "h":
+            set {_secs} to {_num} * 3600
+        else if {_unit} is "d":
+            set {_secs} to {_num} * 86400
+        else:
+            send "{@prefix} &cUnknown unit. Use s / m / h / d."
+            stop
+
+        # cek target
+        if arg-1 is not online:
+            send "{@prefix} &c%arg-1% is not online."
+            stop
+        if arg-1 is player:
+            send "{@prefix} &cYou can't freeze yourself."
+            stop
+
+        # cek udah frozen
+        if {freeze.active::%arg-1's uuid%} is true:
+            send "{@prefix} &f%arg-1% &cis already frozen."
+            stop
+
+        # simpan data
+        set {freeze.active::%arg-1's uuid%} to true
+        set {freeze.by::%arg-1's uuid%} to player's name
+        set {freeze.until::%arg-1's uuid%} to now + {_secs} seconds
+
+        # notif ke target
+        send "" to arg-1
+        send " &c&l! &cYou have been frozen by &f%player%" to arg-1
+        send " &c&l! &cPlease wait for a staff member to contact you." to arg-1
+        send " &c&l! &7Duration: &f%arg-2%" to arg-1
+        send "" to arg-1
+        play sound "block.anvil.land" with volume 1 and pitch 0.5 to arg-1
+
+        # notif ke admin
+        send "{@prefix} &f%arg-1% &7has been frozen for &f%arg-2%&7. &8(by %player%)"
+
+        # broadcast ke semua staff
+        loop all players:
+            if loop-player has permission "{@perm}":
+                if loop-player is not player:
+                    send "{@prefix} &f%player% &7froze &f%arg-1% &7for &f%arg-2%." to loop-player
+
+command /unfreeze <player>:
+    permission: {@perm}
+    permission message: {@prefix} &cNo permission.
+    trigger:
+        if arg-1 is not set:
+            send "{@prefix} &c/unfreeze <player>"
+            stop
+
+        if {freeze.active::%arg-1's uuid%} is not true:
+            send "{@prefix} &f%arg-1% &cis not frozen."
+            stop
+
+        delete {freeze.active::%arg-1's uuid%}
+        delete {freeze.by::%arg-1's uuid%}
+        delete {freeze.until::%arg-1's uuid%}
+
+        send "{@prefix} &aYou have been unfrozen." to arg-1
+        play sound "block.note_block.pling" with volume 1 and pitch 2 to arg-1
+
+        send "{@prefix} &f%arg-1% &7has been unfrozen."
+
+        loop all players:
+            if loop-player has permission "{@perm}":
+                if loop-player is not player:
+                    send "{@prefix} &f%player% &7unfroze &f%arg-1%." to loop-player
+
+# block movement + command untuk frozen player
+on command:
+    if {freeze.active::%player's uuid%} is true:
+        cancel event
+        send "{@prefix} &cYou are frozen. You cannot use commands." to player
+        play sound "block.anvil.land" with volume 0.5 and pitch 2 to player
+
+on player move:
+    if {freeze.active::%player's uuid%} is true:
+        set {_loc} to player's location
+        teleport player to {_loc}
+
+# persist freeze on login
+on join:
+    if {freeze.active::%player's uuid%} is true:
+        # cek apakah sudah expire
+        if {freeze.until::%player's uuid%} is set:
+            if now > {freeze.until::%player's uuid%}:
+                delete {freeze.active::%player's uuid%}
+                delete {freeze.by::%player's uuid%}
+                delete {freeze.until::%player's uuid%}
+                stop
+        wait 2 ticks
+        send "" to player
+        send " &c&l! &cYou are still frozen by &f%{freeze.by::%player's uuid%}%" to player
+        send " &c&l! &cPlease wait for a staff member to contact you." to player
+        send "" to player
+        play sound "block.anvil.land" with volume 1 and pitch 0.5 to player
+
+# auto unfreeze timer
+every 10 seconds:
+    loop all players:
+        if {freeze.active::%loop-player's uuid%} is true:
+            if {freeze.until::%loop-player's uuid%} is set:
+                if now > {freeze.until::%loop-player's uuid%}:
+                    delete {freeze.active::%loop-player's uuid%}
+                    delete {freeze.by::%loop-player's uuid%}
+                    delete {freeze.until::%loop-player's uuid%}
+                    send "{@prefix} &aYour freeze has expired. You are now free." to loop-player
+                    play sound "block.note_block.pling" with volume 1 and pitch 2 to loop-player
+
+
+# ---------- invsee ----------
+
+command /inv <player>:
+    permission: {@perm}
+    permission message: {@prefix} &cNo permission.
+    trigger:
+        if arg-1 is not set:
+            send "{@prefix} &c/inv <player>"
+            stop
+        if arg-1 is not online:
+            send "{@prefix} &c%arg-1% is not online."
+            stop
+        if arg-1 is player:
+            send "{@prefix} &cYou can't view your own inventory."
+            stop
+        open arg-1's inventory to player
+
+
+# ---------- vanish ----------
+
+command /vanish:
+    permission: {@perm}
+    permission message: {@prefix} &cNo permission.
+    trigger:
+        if {vanish.active::%player's uuid%} is true:
+            delete {vanish.active::%player's uuid%}
+            reveal player
+            send "{@prefix} &7Vanish &coff"
+            loop all players:
+                if loop-player has permission "{@perm}":
+                    send "{@prefix} &f%player% &7is now &cvisible." to loop-player
+        else:
+            set {vanish.active::%player's uuid%} to true
+            hide player from all players
+            loop all players:
+                if loop-player has permission "{@perm}":
+                    show player to loop-player
+                    send "{@prefix} &f%player% &7is now &bvanished." to loop-player
+            send "{@prefix} &7Vanish &aon"
+
+on join:
+    loop all players:
+        if {vanish.active::%loop-player's uuid%} is true:
+            hide loop-player from player
+            if player has permission "{@perm}":
+                show loop-player to player
+
+
+# ---------- chat ----------
+
+# personal clear (semua player bisa)
+command /chatclear:
+    trigger:
+        loop 100 times:
+            send " " to player
+        send "{@prefix} &7Chat cleared." to player
+
+# global clear (admin only)
+command /clearchat:
+    permission: {@perm}
+    permission message: {@prefix} &cNo permission.
+    trigger:
+        loop all players:
+            loop 100 times:
+                send " " to loop-player
+        broadcast "{@prefix} &7Chat has been cleared by &f%player%&7."
+
+# global mute (admin only)
+command /chatmute:
+    permission: {@perm}
+    permission message: {@prefix} &cNo permission.
+    trigger:
+        if {chat.muted} is true:
+            delete {chat.muted}
+            broadcast "{@prefix} &aChat has been unmuted."
+        else:
+            set {chat.muted} to true
+            broadcast "{@prefix} &cChat has been muted by &f%player%&c."
+
+on chat:
+    if {freeze.active::%player's uuid%} is true:
+        stop
+
+    if {chat.muted} is true:
+        if player doesn't have permission "{@perm}":
+            cancel event
+            send "{@prefix} &cChat is currently muted." to player
