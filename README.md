@@ -111,4 +111,4 @@ v1.0 - initial release
 
 ## Issues / Suggestions
 
-Post in the discussion section on SpigotMC or Modrinth.
+Post in the discussion section on SpigotMC.
