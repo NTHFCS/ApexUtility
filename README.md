@@ -1,23 +1,39 @@
+> Official release page for ApexUtility — a lightweight staff utility built for modern Paper/Spigot environments.
+
 # ApexUtility v1.0
 by NathanFCS
 
-Lightweight staff utility script for Paper/Spigot servers.
-No dependencies required beyond Skript.
+ApexUtility is a lightweight staff utility script for Paper/Spigot servers using Skript.
+
+Built for server teams that want essential moderation tools in one clean and reliable resource.
+
+---
+
+## Overview
+
+ApexUtility combines several core staff utilities into one simple Skript project:
+
+- Timed freeze system
+- Inventory viewer
+- Vanish toggle
+- Personal and global chat tools
+
+This project is designed for server owners who prefer lightweight utility scripts over larger plugin stacks.
 
 ---
 
 ## Requirements
 
-- Paper or Spigot 1.19+
-- Skript 2.8+
+- Paper or Spigot **1.19+**
+- Skript **2.8+**
 
 ---
 
-## Install
+## Installation
 
-1. Drop `ApexUtility.sk` into `plugins/Skript/scripts/`
+1. Place `ApexUtility.sk` in `plugins/Skript/scripts/`
 2. Run `/skript reload ApexUtility`
-3. Done.
+3. Done
 
 ---
 
@@ -52,12 +68,14 @@ Permission node: `apexutility.admin`
 | `2h` | 2 hours |
 | `1d` | 1 day |
 
-Example:
-```
+### Example
+
+```text
 /freeze Steve 10m
 /freeze Aaron 1h
 /freeze NathanFCS 1d
 ```
+
 ---
 
 ## Freeze System
@@ -66,38 +84,40 @@ Example:
 - Frozen players **can still chat**
 - Freeze **persists through logout/login**
 - Freeze **expires automatically** when duration ends
-- Staff get notified when a player is frozen/unfrozen
-- Frozen player sees who froze them
+- Staff are notified when a player is frozen or unfrozen
+- Frozen players can see who froze them
 
 ---
 
 ## Vanish System
 
-- Vanished players are **invisible to regular players**
+- Vanished players are **hidden from regular players**
 - Staff can **still see** vanished players
-- Vanish state **persists through login** (other staff see you correctly)
+- Vanish state is handled correctly when players join
 
 ---
 
 ## Chat System
 
-- `/chatclear` — clears **your own** chat only, doesn't affect others
-- `/clearchat` — clears chat **for everyone**
-- `/chatmute` — prevents non-staff from sending messages
+- `/chatclear` clears **your own** chat only
+- `/clearchat` clears chat **for everyone**
+- `/chatmute` prevents non-staff players from sending messages
 
 ---
 
 ## Changelog
-```
+
+```text
 v1.0 - initial release
-     - freeze with duration (s/m/h/d)
-     - freeze persists on logout
-     - auto unfreeze on expire
-     - invsee
+     - freeze with duration support (s/m/h/d)
+     - freeze persists through logout/login
+     - automatic unfreeze on expiry
+     - inventory viewer
      - vanish with staff visibility
-     - chatclear (personal)
-     - clearchat + chatmute (admin)
+     - personal chat clear
+     - global chat clear and chat mute
 ```
+
 ---
 
 ## Planned
@@ -109,6 +129,31 @@ v1.0 - initial release
 
 ---
 
-## Issues / Suggestions
+## License
 
-Post in the discussion section on SpigotMC or Skunity.
+This project is licensed under the **MIT License**.
+
+---
+
+## Notes
+
+- This is a **Skript resource**, not a standalone `.jar` plugin
+- Designed for **Paper/Spigot-based servers**
+- Lightweight and easy to maintain
+- Official links are provided below for safety and authenticity
+
+---
+
+## Official Links
+
+### Profiles
+- **GitHub:** https://github.com/NTHFCS
+- **SpigotMC Profile:** https://www.spigotmc.org/members/nathanfcs.2521802/
+- **skUnity Profile:** https://forums.skunity.com/members/nathanfcs.40131/
+
+### Resource Pages
+- **SpigotMC:** https://www.spigotmc.org/resources/apexutility.134427/
+- **skUnity:** https://forums.skunity.com/resources/apexutility.1884/
+
+### Community
+- **Discord:** https://discord.gg/V8dpGdsMeT
