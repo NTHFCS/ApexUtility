@@ -157,3 +157,10 @@ This project is licensed under the **MIT License**.
 
 ### Community
 - **Discord:** https://discord.gg/V8dpGdsMeT
+
+---
+
+## Maintained By
+
+**NathanFCS Studio**
+Releases • Support • Product Development
