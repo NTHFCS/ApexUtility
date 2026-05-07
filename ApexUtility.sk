@@ -215,7 +215,7 @@ on join:
 
 # ---------- chat ----------
 
-# personal clear (semua player bisa)
+# personal clear (players)
 command /chatclear:
     trigger:
         loop 100 times:
